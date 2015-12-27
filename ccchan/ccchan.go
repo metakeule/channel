@@ -15,9 +15,15 @@ type ccchan struct {
 	ch channel.Channel
 }
 
-func (c *ccchan) Subscribe(r channel.Receiver, msg ...interface{}) {
+func (c *ccchan) Subscribe(r channel.Receiver, msgs ...interface{}) {
 	c.Lock()
-	c.ch.Subscribe(r, msg...)
+	c.ch.Subscribe(r, msgs...)
+	c.Unlock()
+}
+
+func (c *ccchan) Unsubscribe(r channel.Receiver, msgs ...interface{}) {
+	c.Lock()
+	c.ch.Unsubscribe(r, msgs...)
 	c.Unlock()
 }
 
@@ -25,10 +31,4 @@ func (c *ccchan) Send(msg interface{}) {
 	c.RLock()
 	c.ch.Send(msg)
 	c.RUnlock()
-}
-
-func (c *ccchan) Unsubscribe(r channel.Receiver, msg ...interface{}) {
-	c.Lock()
-	c.ch.Unsubscribe(r, msg...)
-	c.Unlock()
 }

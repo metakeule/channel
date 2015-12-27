@@ -1,11 +1,8 @@
-package channel_test
+package ccchan_test
 
 import (
 	"fmt"
-	"github.com/metakeule/channel"
-	// for logging "github.com/metakeule/channel/logchan"
-	// for concurrency "github.com/metakeule/channel/ccchan"
-	// for broadcasting  "github.com/metakeule/channel/bcchan"
+	"github.com/metakeule/channel/ccchan"
 )
 
 type message string
@@ -36,15 +33,20 @@ func (printer) Receive(check bool, msg interface{}) {
 }
 
 func ExampleChannel() {
-	ch := channel.New()
+	ch := ccchan.New()
 	ch.Subscribe(printer{}, message(""), eMailAddress(""), eMail{})
-	ch.Send(message("Hello World!"))
-	ch.Unsubscribe(printer{}, eMailAddress(""))
+	stop := make(chan bool)
+	go func() {
+		ch.Send(message("Hello World!"))
+		ch.Unsubscribe(printer{}, eMail{})
+		stop <- true
+	}()
+	<-stop
 	ch.Send(eMailAddress("test@example.com"))
 	ch.Send(eMail{"Hello", "World", "sender@example.com", "receiver@example.com"})
 
 	// Output:
 	//
 	// got message: "Hello World!"
-	// got eMail from sender@example.com: Hello World
+	// got eMailAddress: "test@example.com"
 }

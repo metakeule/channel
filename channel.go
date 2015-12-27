@@ -17,14 +17,12 @@ type Receiver interface {
 
 type ReceiverFunc func(check bool, msg interface{})
 
-func (r ReceiverFunc) Receive(check bool, msg interface{}) {
-	r(check, msg)
-}
+func (r ReceiverFunc) Receive(check bool, msg interface{}) { r(check, msg) }
 
 // Channel allows subscription to message types and sending of events
 type Channel interface {
-	Subscribe(r Receiver, msg ...interface{})
-	Unsubscribe(r Receiver, msg ...interface{})
+	Subscribe(r Receiver, msgs ...interface{})
+	Unsubscribe(r Receiver, msgs ...interface{})
 	Send(msg interface{})
 }
 
@@ -43,14 +41,14 @@ type channel map[string][]Receiver
 
 // Subscribe subscribes a receiver to types of messages
 // if msg is not passed, it will receive all messages from the channel
-func (c channel) Subscribe(r Receiver, msg ...interface{}) {
+func (c channel) Subscribe(r Receiver, msgs ...interface{}) {
 	var ty string
-	if len(msg) == 0 {
+	if len(msgs) == 0 {
 		c[ty] = append(c[ty], r)
 		return
 	}
 
-	for _, m := range msg {
+	for _, m := range msgs {
 		r.Receive(true, m) // checks if the notification works
 		ty = reflect.TypeOf(m).Name()
 		c[ty] = append(c[ty], r)
@@ -88,13 +86,13 @@ func (c channel) unsubscribe(r Receiver, ty string) {
 	c[ty] = append(rcs[0:j], rcs[j+1:]...)
 }
 
-func (c channel) Unsubscribe(r Receiver, msg ...interface{}) {
+func (c channel) Unsubscribe(r Receiver, msgs ...interface{}) {
 
-	if len(msg) == 0 {
+	if len(msgs) == 0 {
 		c.unsubscribe(r, "")
 	}
 
-	for _, m := range msg {
+	for _, m := range msgs {
 		c.unsubscribe(r, reflect.TypeOf(m).Name())
 	}
 

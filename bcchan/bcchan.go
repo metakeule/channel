@@ -11,11 +11,11 @@ func New() channel.Channel {
 
 type bcchan []channel.Receiver
 
-func (b *bcchan) Subscribe(r channel.Receiver, msg ...interface{}) {
+func (b *bcchan) Subscribe(r channel.Receiver, msgs ...interface{}) {
 	*b = append(*b, r)
 }
 
-func (b *bcchan) Unsubscribe(r channel.Receiver, msg ...interface{}) {
+func (b *bcchan) Unsubscribe(r channel.Receiver, msgs ...interface{}) {
 	var j int = -1
 
 	for i, rc := range *b {
